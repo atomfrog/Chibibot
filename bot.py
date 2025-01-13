@@ -146,56 +146,6 @@ async def unban_error(ctx, error):
     else:
         await ctx.send("I could not unban the user. Please try again.")
 
-
-@bot.command()
-@commands.has_permissions(kick_members=True)
-async def warn(ctx, user: nextcord.Member, *, reason=None):
-    embed = nextcord.Embed(
-        color=nextcord.Colour.red()
-    )
-    embed.set_author(name='---You have been warned---')
-    embed.add_field(name=f'You have been warned by {ctx.author} for reason {reason} .',
-                    value='This message is automatically '
-                          'sent. It will be deleted after an '
-                          'hour.', inline=False)
-    embed2 = nextcord.Embed(
-        color=nextcord.Colour.green()
-    )
-    embed2.set_author(name=f'\u2705 Member {user} has been warned')
-    embed2.add_field(name=f'You warned {user} for reason {reason} .', value=f'I sent a direct Message to {user} !')
-    if user == ctx.author:
-        return await ctx.send("You cannot warn yourself!")
-    if reason is None:
-        return await ctx.send("Please specify a reason to warn this user.")
-    await user.send(embed=embed, delete_after=60 * 60)
-    await ctx.send(embed=embed2)
-
-
-@warn.error
-async def warn_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("Sorry, You aren\'t allowed to warn Users. ")
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You have to specify a User!")
-    if isinstance(error, commands.MemberNotFound):
-        await ctx.send("Hey, i did not find that user. Make sure it\'s the right name.")
-
-#Please don't use this right now
-@bot.command()
-@commands.has_permissions(kick_members=True)
-async def set_watchlist(ctx, user: nextcord.Member):
-    watchlist = []
-    embed = nextcord.Embed(
-        color=nextcord.Colour.random()
-    )
-    embed.set_author(name="--User Watchlist--")
-    embed.add_field(name=f"{user} is now on the Watchlist.", value=f"{user} is already informed.", inline=False)
-    watchlist.append(f'{user}')
-    await ctx.send(embed=embed)
-    await user.send("You are now on the Moderator Watchlist! Be Careful, now you can get kicked easily!")
-    await ctx.send(f'Current members on the watchlist: {watchlist}')
-
-
 @bot.command(name='create_thread', aliases=['thread'])
 @commands.has_permissions(create_public_threads=True)
 async def thread(ctx, *, arg):
@@ -274,33 +224,7 @@ async def close_ticket_error(ctx, error):
         await ctx.send("e.g. c!close_ticket justarandomuser")
 
 
-# some random stuff idk why we added this
-@bot.command()
-async def rickroll(ctx):
-    rickroll_button = Button(label='get rickrolled', url='https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-
-    rickroll_view = View(timeout=None)
-    rickroll_view.add_item(rickroll_button)
-    await ctx.send("So you really want to get rickrolled?", view=rickroll_view)
-
-
-@bot.command()
-async def lotto(ctx, amount: int):
-    lottonumber = random.randint(1, 50)
-    if amount == lottonumber:
-        await ctx.send("Congratulations! You\'re right!")
-    elif amount < 1 or amount > 50:
-        await ctx.send("Only Numbers between 1 and 50 are valid!")
-    else:
-        await ctx.send(f"Noo... Sorry, {amount} isn\'t right... The Solution was {lottonumber}. Better Luck next Time!")
-
-
-@lotto.error
-async def lotto_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Please enter a number between 1 and 50 after the c!lotto command.")
-
-
+# some random stuff idk why i added this
 @bot.command()
 async def play(ctx):
     valid_choices = ["🪨", "📰", "✂"]
@@ -337,10 +261,6 @@ async def play(ctx):
             await ctx.send("Tie! No one wins! But why did we try to fight ourselves with the same thing?")
         else:
             await ctx.send("WHAT? HOW DID YOU JUST SMASH ME?")
-            await asyncio.sleep(0.1)
-            await ctx.send("*aimbot*")
-            await asyncio.sleep(0.1)
-            await ctx.send("*hacker*")
     if str(reaction.emoji) == "📰":
         if ai_choice == "Scissors":
             await ctx.send("Sometimes paper isn't strong enough against scissors... anyways, **I won**")
@@ -399,58 +319,5 @@ async def clear(ctx, amount: int):
 async def clear_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Please specify an amount of messages to delete!')
-
-
-# new battle command
-@bot.command()
-async def battle(ctx, user: nextcord.Member):
-    if user == ctx.author:
-        await ctx.send("What? You are literally trying to battle yourself?")
-        await asyncio.sleep(0.5)
-        return await ctx.send("You are a bit weird...")
-
-    class Army:
-        player1 = ctx.author
-
-        def __init__(self):
-            self.Force = random.randint(10, 100)
-
-        @staticmethod
-        async def initiate_attack():
-            await ctx.send("Recruiting the Troops...")
-            await asyncio.sleep(0.5)
-            await ctx.send(f"Army is ready to battle against {user} !")
-
-    class Enemy(Army):
-        enemy_player = user
-
-        @staticmethod
-        async def initiate_attack():
-            await user.send(f'Quick! You are getting  attacked by {ctx.author}!')
-        pass
-
-    a = Army()
-    e = Enemy()
-    await a.initiate_attack()
-    await e.initiate_attack()
-    await asyncio.sleep(2.5)
-    if a.Force > e.Force:
-        await ctx.send(f'{a.player1} won against {e.enemy_player} !')
-        await user.send(f'{a.player1} defeated you...')
-    elif a.Force == e.Force:
-        await ctx.send('No one won!')
-        await user.send("You were lucky... no one won!")
-    else:
-        await ctx.send(f'{e.enemy_player} won the battle.')
-        await user.send(f"Congrats! You won against {a.player1}")
-
-
-@battle.error
-async def battle_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Umm... \n So you have to specify a user to battle... otherwise it won't work.")
-
-    elif isinstance(error, commands.MemberNotFound):
-        await ctx.send("Hey, it looks like this user is not on the server.")
                                             
 bot.run('Your token here')
